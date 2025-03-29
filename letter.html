@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -114,104 +113,102 @@
   <script>
     const code = new URLSearchParams(window.location.search).get('code');
     const paddedCode = code?.toUpperCase().padStart(4, '0');
-    const favBtn = document.getElementById("favBtn");
+    const favBtn = document.getElementById("favBtn");if (!paddedCode) {
+  document.body.innerHTML = '<p>No character code provided in URL.</p>';
+} else {
+  const codepoint = parseInt(paddedCode, 16);
+  const char = String.fromCodePoint(codepoint);
+  document.getElementById('charSymbol').textContent = char;
+  document.getElementById('charCode').textContent = char;
+  document.getElementById('codepoint').textContent = `U+${paddedCode}`;
+  document.getElementById('linkCodepoints').href = `https://codepoints.net/U+${paddedCode}`;
 
-    if (!paddedCode) {
-      document.body.innerHTML = '<p>No character code provided in URL.</p>';
-    } else {
-      const codepoint = parseInt(paddedCode, 16);
-      const char = String.fromCodePoint(codepoint);
-      document.getElementById('charSymbol').textContent = char;
-      document.getElementById('charCode').textContent = char;
-      document.getElementById('codepoint').textContent = `U+${paddedCode}`;
-      document.getElementById('linkCodepoints').href = `https://codepoints.net/U+${paddedCode}`;
+  const block = unicodeBlocks.find(b => codepoint >= b.start && codepoint <= b.end);
+  document.getElementById('charBlock').textContent = block ? block.name : 'Unknown Block';
 
-      const block = unicodeBlocks.find(b => codepoint >= b.start && codepoint <= b.end);
-      document.getElementById('charBlock').textContent = block ? block.name : 'Unknown Block';
+  const recent = JSON.parse(localStorage.getItem("recent") || "[]");
+  const updated = [paddedCode, ...recent.filter(c => c !== paddedCode)].slice(0, 10);
+  localStorage.setItem("recent", JSON.stringify(updated));
 
-      const recent = JSON.parse(localStorage.getItem("recent") || "[]");
-      const updated = [paddedCode, ...recent.filter(c => c !== paddedCode)].slice(0, 10);
-      localStorage.setItem("recent", JSON.stringify(updated));
+  const favs = JSON.parse(localStorage.getItem("favorites") || "[]");
+  favBtn.textContent = favs.includes(paddedCode) ? "★ Remove Favorite" : "☆ Add Favorite";
 
-      const favs = JSON.parse(localStorage.getItem("favorites") || "[]");
-      favBtn.textContent = favs.includes(paddedCode) ? "★ Remove Favorite" : "☆ Add Favorite";
-
-      fetch("UnicodeData.txt")
-        .then(res => res.text())
-        .then(text => {
-          const line = text.split('\\n').find(l => l.startsWith(paddedCode));
-          if (line) {
-            const parts = line.split(';');
-            document.getElementById('charName').textContent = parts[1];
-            document.getElementById('charCategory').textContent = parts[2];
-            document.getElementById('charCombining').textContent = parts[3];
-            document.getElementById('charBidi').textContent = parts[4];
-            document.getElementById('charMirrored').textContent = parts[9] === 'Y' ? 'Yes' : 'No';
-          }
-        });
-
-      fetch("Scripts.txt")
-        .then(res => res.text())
-        .then(text => {
-          const lines = text.split('\\n');
-          for (let line of lines) {
-            const [range, script] = line.split(';').map(s => s.trim());
-            if (!range || !script) continue;
-            let [start, end] = range.split('..');
-            if (!end) end = start;
-            const s = parseInt(start, 16), e = parseInt(end, 16);
-            if (codepoint >= s && codepoint <= e) {
-              document.getElementById('charScript').textContent = script;
-              break;
-            }
-          }
-        });
-
-      const plane = codepoint <= 0xFFFF ? "BMP (Basic Multilingual Plane)" :
-                    codepoint <= 0x1FFFF ? "SMP (Supplementary Multilingual Plane)" :
-                    codepoint <= 0x2FFFF ? "SIP (Supplementary Ideographic Plane)" :
-                    codepoint <= 0x3FFFF ? "TIP (Tertiary Ideographic Plane)" : "Unknown";
-      document.getElementById('charPlane').textContent = plane;
-
-      const encoder = new TextEncoder();
-      const utf8Bytes = Array.from(encoder.encode(char)).map(b => b.toString(16).padStart(2, '0')).join(' ');
-      document.getElementById('utf8').textContent = utf8Bytes.toUpperCase();
-
-      // Fixed UTF-16 surrogate pair handling
-      const utf16Units = [];
-      for (const unit of new TextEncoder('utf-16le').encode(char)) {
-        utf16Units.push(unit.toString(16).padStart(2, '0'));
+  fetch("UnicodeData.txt")
+    .then(res => res.text())
+    .then(text => {
+      const lines = text.split('\n');
+      const line = lines.find(l => l.startsWith(paddedCode));
+      if (line) {
+        const parts = line.split(';');
+        document.getElementById('charName').textContent = parts[1] || '(N/A)';
+        document.getElementById('charCategory').textContent = parts[2] || '(N/A)';
+        document.getElementById('charCombining').textContent = parts[3] || '(N/A)';
+        document.getElementById('charBidi').textContent = parts[4] || '(N/A)';
+        document.getElementById('charMirrored').textContent = parts[9] === 'Y' ? 'Yes' : 'No';
       }
-      const utf16 = utf16Units.map((u, i) => i % 2 === 1 ? utf16Units[i - 1] + u : null)
-                              .filter(x => x).join(' ').toUpperCase();
-      document.getElementById('utf16').textContent = utf16;
+    });
 
-      const htmlEntity = `&#${codepoint};`;
-      document.getElementById('htmlEntity').textContent = htmlEntity;
-    }
+  fetch("Scripts.txt")
+    .then(res => res.text())
+    .then(text => {
+      const lines = text.split('\n');
+      for (let line of lines) {
+        const [range, script] = line.split(';').map(s => s.trim());
+        if (!range || !script) continue;
+        let [start, end] = range.split('..');
+        if (!end) end = start;
+        const s = parseInt(start, 16), e = parseInt(end, 16);
+        if (codepoint >= s && codepoint <= e) {
+          document.getElementById('charScript').textContent = script;
+          break;
+        }
+      }
+    });
 
-    function copyChar() {
-      navigator.clipboard.writeText(String.fromCodePoint(parseInt(code, 16)));
-      alert("Character copied!");
-    }
+  const plane = codepoint <= 0xFFFF ? "BMP (Basic Multilingual Plane)" :
+                codepoint <= 0x1FFFF ? "SMP (Supplementary Multilingual Plane)" :
+                codepoint <= 0x2FFFF ? "SIP (Supplementary Ideographic Plane)" :
+                codepoint <= 0x3FFFF ? "TIP (Tertiary Ideographic Plane)" : "Unknown";
+  document.getElementById('charPlane').textContent = plane;
 
-    function toggleFavorite() {
-      const favs = JSON.parse(localStorage.getItem("favorites") || "[]");
-      const idx = favs.indexOf(paddedCode);
-      if (idx >= 0) favs.splice(idx, 1);
-      else favs.unshift(paddedCode);
-      localStorage.setItem("favorites", JSON.stringify(favs));
-      favBtn.textContent = favs.includes(paddedCode) ? "★ Remove Favorite" : "☆ Add Favorite";
-    }
+  const encoder = new TextEncoder();
+  const utf8Bytes = Array.from(encoder.encode(char)).map(b => b.toString(16).padStart(2, '0')).join(' ');
+  document.getElementById('utf8').textContent = utf8Bytes.toUpperCase();
 
-    // Dark mode persistence
-    function toggleDarkMode() {
-      const enabled = document.body.classList.toggle("dark-mode");
-      localStorage.setItem("darkMode", enabled);
-    }
-    if (localStorage.getItem("darkMode") === "true") {
-      document.body.classList.add("dark-mode");
-    }
+  const utf16Units = [];
+  for (const unit of new TextEncoder('utf-16le').encode(char)) {
+    utf16Units.push(unit.toString(16).padStart(2, '0'));
+  }
+  const utf16 = utf16Units.map((u, i) => i % 2 === 1 ? utf16Units[i - 1] + u : null).filter(x => x).join(' ').toUpperCase();
+  document.getElementById('utf16').textContent = utf16;
+
+  const htmlEntity = `&#${codepoint};`;
+  document.getElementById('htmlEntity').textContent = htmlEntity;
+}
+
+function copyChar() {
+  navigator.clipboard.writeText(String.fromCodePoint(parseInt(code, 16)));
+  alert("Character copied!");
+}
+
+function toggleFavorite() {
+  const favs = JSON.parse(localStorage.getItem("favorites") || "[]");
+  const idx = favs.indexOf(paddedCode);
+  if (idx >= 0) favs.splice(idx, 1);
+  else favs.unshift(paddedCode);
+  localStorage.setItem("favorites", JSON.stringify(favs));
+  favBtn.textContent = favs.includes(paddedCode) ? "★ Remove Favorite" : "☆ Add Favorite";
+}
+
+function toggleDarkMode() {
+  const enabled = document.body.classList.toggle("dark-mode");
+  localStorage.setItem("darkMode", enabled);
+}
+
+if (localStorage.getItem("darkMode") === "true") {
+  document.body.classList.add("dark-mode");
+}
+
   </script>
 </body>
 </html>
