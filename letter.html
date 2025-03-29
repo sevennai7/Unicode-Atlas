@@ -74,8 +74,11 @@
   const utf8Bytes = Array.from(new TextEncoder().encode(char)).map(b => b.toString(16).padStart(2, '0')).join(' ');
   document.getElementById('utf8').textContent = utf8Bytes.toUpperCase();
 
-  const utf16 = [...char].map(c => c.charCodeAt(0).toString(16).padStart(4, '0')).join(' ').toUpperCase();
-  document.getElementById('utf16').textContent = utf16;
+  const utf16Array = [];
+  for (let i = 0; i < char.length; i++) {
+    utf16Array.push(char.charCodeAt(i).toString(16).padStart(4, '0'));
+  }
+  document.getElementById('utf16').textContent = utf16Array.join(' ').toUpperCase();
 
   document.getElementById('htmlEntity').textContent = `&#${cp};`;
 
