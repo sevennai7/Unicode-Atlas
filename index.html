@@ -20,6 +20,14 @@
     .container {
       padding: 2em;
     }
+    #searchBar {
+      width: 100%;
+      padding: 0.5em;
+      margin-bottom: 1em;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
     .block-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -59,40 +67,54 @@
     <p>Explore the blocks that define the world's characters</p>
   </header>
   <div class="container">
+    <input type="text" id="searchBar" placeholder="Search Unicode blocks...">
     <div class="block-grid" id="blockGrid"></div>
     <div id="charGrid" class="char-grid"></div>
-  </div>  <script>
+  </div>
+  <script>
     const blocks = [
-      { name: "Basic Latin", range: "U+0000 - U+007F", start: 0x0000, end: 0x007F },
-      { name: "Latin-1 Supplement", range: "U+0080 - U+00FF", start: 0x0080, end: 0x00FF },
-      { name: "Greek and Coptic", range: "U+0370 - U+03FF", start: 0x0370, end: 0x03FF },
-      { name: "Cyrillic", range: "U+0400 - U+04FF", start: 0x0400, end: 0x04FF },
-      { name: "Arabic", range: "U+0600 - U+06FF", start: 0x0600, end: 0x06FF },
-      { name: "Emoji", range: "U+1F600 - U+1F64F", start: 0x1F600, end: 0x1F64F }
+      { name: "Basic Latin", start: 0x0000, end: 0x007F },
+      { name: "Latin-1 Supplement", start: 0x0080, end: 0x00FF },
+      { name: "Greek and Coptic", start: 0x0370, end: 0x03FF },
+      { name: "Cyrillic", start: 0x0400, end: 0x04FF },
+      { name: "Arabic", start: 0x0600, end: 0x06FF },
+      { name: "Emoji", start: 0x1F600, end: 0x1F64F }
     ];
 
     const blockGrid = document.getElementById("blockGrid");
     const charGrid = document.getElementById("charGrid");
+    const searchBar = document.getElementById("searchBar");
 
-    blocks.forEach(block => {
-      const div = document.createElement("div");
-      div.className = "block";
-      div.innerHTML = `<h3>${block.name}</h3><p>${block.range}</p>`;
-      div.onclick = () => loadCharacters(block);
-      blockGrid.appendChild(div);
-    });
+    function displayBlocks(filter = "") {
+      blockGrid.innerHTML = "";
+      blocks
+        .filter(block => block.name.toLowerCase().includes(filter.toLowerCase()))
+        .forEach(block => {
+          const div = document.createElement("div");
+          const preview = [...Array(5).keys()].map(i => String.fromCodePoint(block.start + i)).join(' ');
+          div.className = "block";
+          div.innerHTML = `<h3>${block.name}</h3><p>U+${block.start.toString(16).toUpperCase()} - U+${block.end.toString(16).toUpperCase()}</p><p>${preview}</p>`;
+          div.onclick = () => loadCharacters(block);
+          blockGrid.appendChild(div);
+        });
+    }
 
     function loadCharacters(block) {
       charGrid.innerHTML = '';
       for (let i = block.start; i <= block.end; i++) {
+        const codeHex = i.toString(16).toUpperCase().padStart(4, '0');
         const char = String.fromCodePoint(i);
         const box = document.createElement("div");
         box.className = "char-box";
         box.textContent = char;
-        box.title = `U+${i.toString(16).toUpperCase().padStart(4, '0')}`;
-        box.onclick = () => navigator.clipboard.writeText(char);
+        box.title = `U+${codeHex}`;
+        box.onclick = () => window.location.href = `letter.html?code=${codeHex}`;
         charGrid.appendChild(box);
       }
     }
-  </script></body>
+
+    searchBar.addEventListener("input", e => displayBlocks(e.target.value));
+    displayBlocks();
+  </script>
+</body>
 </html>
