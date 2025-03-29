@@ -30,6 +30,11 @@
     .dark-mode button {
       background: #666;
     }
+    .dark-mode input, .dark-mode select {
+      background: #2a2a2a;
+      color: white;
+      border-color: #555;
+    }
     header {
       text-align: center;
       margin-bottom: 2em;
@@ -141,12 +146,26 @@
       searchBar.placeholder = placeholders[random];
     }
 
+    function loadBlockData() {
+      if (!window.unicodeBlocks) {
+        const interval = setInterval(() => {
+          if (window.unicodeBlocks) {
+            clearInterval(interval);
+            displayBlocks();
+          }
+        }, 100);
+      } else {
+        displayBlocks();
+      }
+    }
+
     window.addEventListener("DOMContentLoaded", () => {
       updatePlaceholder();
       setInterval(updatePlaceholder, 15000);
       if (localStorage.getItem("darkMode") === "true") {
         document.body.classList.add("dark-mode");
       }
+      loadBlockData();
     });
 
     function toggleDarkMode() {
@@ -210,7 +229,5 @@
         searchBar.focus();
       }
     });
-
-    displayBlocks();
   </script></body>
 </html>
