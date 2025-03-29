@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en">
+<!-- START OF: letter.html --><!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -48,7 +48,7 @@
     }
     .info-line strong {
       display: inline-block;
-      width: 130px;
+      width: 150px;
       font-weight: 600;
     }
     button {
@@ -100,17 +100,24 @@
     <div class="info-line"><strong>UTF-8:</strong> <span id="utf8"></span></div>
     <div class="info-line"><strong>UTF-16:</strong> <span id="utf16"></span></div>
     <div class="info-line"><strong>HTML Entity:</strong> <span id="htmlEntity"></span></div>
-    <div class="info-line"><strong>Copy:</strong> <button onclick="copyChar()">Copy to Clipboard</button></div>
+    <div class="info-line"><strong>Script:</strong> <span id="charScript">(loading...)</span></div>
+    <div class="info-line"><strong>Bidi Class:</strong> <span id="charBidi">(loading...)</span></div>
+    <div class="info-line"><strong>Mirrored:</strong> <span id="charMirrored">(loading...)</span></div>
+    <div class="info-line"><strong>Combining:</strong> <span id="charCombining">(loading...)</span></div>
+    <div class="info-line"><strong>Actions:</strong> 
+      <button onclick="copyChar()">Copy</button>
+      <button onclick="toggleFavorite()" id="favBtn">(loading...)</button>
+    </div>
     <div class="info-line"><strong>More Info:</strong> <a id="linkCodepoints" target="_blank">Codepoints.net</a></div>
   </div>
   <script>
     const code = new URLSearchParams(window.location.search).get('code');
-    const paddedCode = code?.toUpperCase().padStart(4, '0');if (!paddedCode) {
+    const paddedCode = code?.toUpperCase().padStart(4, '0');
+    const favBtn = document.getElementById("favBtn");if (!paddedCode) {
   document.body.innerHTML = '<p>No character code provided in URL.</p>';
 } else {
   const codepoint = parseInt(paddedCode, 16);
   const char = String.fromCodePoint(codepoint);
-
   document.getElementById('charSymbol').textContent = char;
   document.getElementById('charCode').textContent = char;
   document.getElementById('codepoint').textContent = `U+${paddedCode}`;
@@ -118,6 +125,13 @@
 
   const block = unicodeBlocks.find(b => codepoint >= b.start && codepoint <= b.end);
   document.getElementById('charBlock').textContent = block ? block.name : 'Unknown Block';
+
+  const recent = JSON.parse(localStorage.getItem("recent") || "[]");
+  const updated = [paddedCode, ...recent.filter(c => c !== paddedCode)].slice(0, 10);
+  localStorage.setItem("recent", JSON.stringify(updated));
+
+  const favs = JSON.parse(localStorage.getItem("favorites") || "[]");
+  favBtn.textContent = favs.includes(paddedCode) ? "★ Remove Favorite" : "☆ Add Favorite";
 
   fetch("UnicodeData.txt")
     .then(res => res.text())
@@ -127,9 +141,26 @@
         const parts = line.split(';');
         document.getElementById('charName').textContent = parts[1];
         document.getElementById('charCategory').textContent = parts[2];
-      } else {
-        document.getElementById('charName').textContent = '(Name not found)';
-        document.getElementById('charCategory').textContent = '(Unknown)';
+        document.getElementById('charCombining').textContent = parts[3];
+        document.getElementById('charBidi').textContent = parts[4];
+        document.getElementById('charMirrored').textContent = parts[9] === 'Y' ? 'Yes' : 'No';
+      }
+    });
+
+  fetch("Scripts.txt")
+    .then(res => res.text())
+    .then(text => {
+      const lines = text.split('\n');
+      for (let line of lines) {
+        const [range, script] = line.split(';').map(s => s.trim());
+        if (!range || !script) continue;
+        let [start, end] = range.split('..');
+        if (!end) end = start;
+        const s = parseInt(start, 16), e = parseInt(end, 16);
+        if (codepoint >= s && codepoint <= e) {
+          document.getElementById('charScript').textContent = script;
+          break;
+        }
       }
     });
 
@@ -159,6 +190,16 @@ function toggleDarkMode() {
   document.body.classList.toggle("dark-mode");
 }
 
+function toggleFavorite() {
+  const favs = JSON.parse(localStorage.getItem("favorites") || "[]");
+  const idx = favs.indexOf(paddedCode);
+  if (idx >= 0) favs.splice(idx, 1);
+  else favs.unshift(paddedCode);
+  localStorage.setItem("favorites", JSON.stringify(favs));
+  favBtn.textContent = favs.includes(paddedCode) ? "★ Remove Favorite" : "☆ Add Favorite";
+}
+
   </script>
 </body>
 </html>
+<!-- END OF: letter.html -->
