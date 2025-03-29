@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -75,11 +74,7 @@
   const utf8Bytes = Array.from(new TextEncoder().encode(char)).map(b => b.toString(16).padStart(2, '0')).join(' ');
   document.getElementById('utf8').textContent = utf8Bytes.toUpperCase();
 
-  const utf16Units = [];
-  for (const unit of new TextEncoder('utf-16le').encode(char)) {
-    utf16Units.push(unit.toString(16).padStart(2, '0'));
-  }
-  const utf16 = utf16Units.map((u, i) => i % 2 === 1 ? utf16Units[i - 1] + u : null).filter(x => x).join(' ').toUpperCase();
+  const utf16 = [...char].map(c => c.charCodeAt(0).toString(16).padStart(4, '0')).join(' ').toUpperCase();
   document.getElementById('utf16').textContent = utf16;
 
   document.getElementById('htmlEntity').textContent = `&#${cp};`;
@@ -106,7 +101,7 @@
       for (let line of lines) {
         const [rangePart, scriptPartRaw] = line.split(';').map(s => s.trim());
         if (!rangePart || !scriptPartRaw) continue;
-        const script = scriptPartRaw.split('#')[0].trim(); // remove inline comment
+        const script = scriptPartRaw.split('#')[0].trim();
         let [start, end] = rangePart.split('..');
         if (!end) end = start;
         const s = parseInt(start, 16), e = parseInt(end, 16);
