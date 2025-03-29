@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unicode Character Info</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f9f9;
+      color: #333;
+      padding: 2em;
+    }
+    .char-display {
+      font-size: 4em;
+      text-align: center;
+    }
+    .info-box {
+      background: white;
+      padding: 1em;
+      margin-top: 1em;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .info-title {
+      font-weight: bold;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+  <div class="char-display" id="charSymbol"></div>
+  <div class="info-box">
+    <div class="info-title">Character Info</div>
+    <p><strong>Character:</strong> <span id="charCode"></span></p>
+    <p><strong>Codepoint:</strong> <span id="codepoint"></span></p>
+    <p><strong>Name:</strong> <span id="charName"></span></p>
+    <p><strong>Block:</strong> <span id="charBlock"></span></p>
+    <p><strong>Category:</strong> <span id="charCategory"></span></p>
+    <p><strong>Copy:</strong> <button onclick="copyChar()">Copy to Clipboard</button></p>
+  </div>
+  <script>
+    const blocks = [
+      { name: "Basic Latin", start: 0x0000, end: 0x007F },
+      { name: "Latin-1 Supplement", start: 0x0080, end: 0x00FF },
+      { name: "Greek and Coptic", start: 0x0370, end: 0x03FF },
+      { name: "Cyrillic", start: 0x0400, end: 0x04FF },
+      { name: "Arabic", start: 0x0600, end: 0x06FF },
+      { name: "Emoji", start: 0x1F600, end: 0x1F64F }
+    ];
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+
+    if (!code) {
+      document.body.innerHTML = '<p>No character code provided.</p>';
+    } else {
+      const codepoint = parseInt(code, 16);
+      const char = String.fromCodePoint(codepoint);
+
+      document.getElementById('charSymbol').textContent = char;
+      document.getElementById('charCode').textContent = char;
+      document.getElementById('codepoint').textContent = `U+${code.toUpperCase()}`;
+      document.getElementById('charName').textContent = '(loading...)';
+      document.getElementById('charBlock').textContent = '(Detecting...)';
+      document.getElementById('charCategory').textContent = '(loading...)';
+
+      const block = blocks.find(b => codepoint >= b.start && codepoint <= b.end);
+      if (block) {
+        document.getElementById('charBlock').textContent = block.name;
+      } else {
+        document.getElementById('charBlock').textContent = 'Unknown Block';
+      }
+
+      fetch('https://unicode.org/Public/UNIDATA/UnicodeData.txt')
+        .then(response => response.text())
+        .then(text => {
+          const line = text.split('\n').find(l => l.startsWith(code.toUpperCase()));
+          if (line) {
+            const parts = line.split(';');
+            document.getElementById('charName').textContent = parts[1];
+            document.getElementById('charCategory').textContent = parts[2];
+          } else {
+            document.getElementById('charName').textContent = '(Name not found)';
+          }
+        });
+    }
+
+    function copyChar() {
+      navigator.clipboard.writeText(String.fromCodePoint(parseInt(code, 16)));
+      alert("Character copied!");
+    }
+  </script>
+</body>
+</html>
