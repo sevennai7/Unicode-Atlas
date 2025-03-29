@@ -247,6 +247,19 @@
     displayBlocks();
     loadStoredPanel("favorites", favoritesPanel);
     loadStoredPanel("recent", recentPanel);
+
+
+// Dark mode persistence logic
+function toggleDarkMode() {
+  const enabled = document.body.classList.toggle("dark-mode");
+  localStorage.setItem("darkMode", enabled);
+}
+
+// Apply saved mode on load
+if (localStorage.getItem("darkMode") === "true") {
+  document.body.classList.add("dark-mode");
+}
+    
   </script></body>
 </html>
 <!-- END OF: index.html -->
