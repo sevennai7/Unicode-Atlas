@@ -36,35 +36,63 @@
     .block:hover {
       transform: scale(1.02);
     }
+    .char-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(30px, 1fr));
+      gap: 0.5em;
+      margin-top: 2em;
+    }
+    .char-box {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 0.5em;
+      text-align: center;
+      font-size: 1.2em;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1>The Great Unicode Atlas</h1>
+    <h1>Unicode Atlas</h1>
     <p>Explore the blocks that define the world's characters</p>
   </header>
   <div class="container">
-    <div class="block-grid" id="blockGrid">
-      <!-- Unicode blocks will load here dynamically -->
-    </div>
+    <div class="block-grid" id="blockGrid"></div>
+    <div id="charGrid" class="char-grid"></div>
   </div>  <script>
     const blocks = [
-      { name: "Basic Latin", range: "U+0000 - U+007F" },
-      { name: "Latin-1 Supplement", range: "U+0080 - U+00FF" },
-      { name: "Greek and Coptic", range: "U+0370 - U+03FF" },
-      { name: "Cyrillic", range: "U+0400 - U+04FF" },
-      { name: "Arabic", range: "U+0600 - U+06FF" },
-      { name: "Emojis/Symbols", range: "U+1F600 - U+1F64F" },
+      { name: "Basic Latin", range: "U+0000 - U+007F", start: 0x0000, end: 0x007F },
+      { name: "Latin-1 Supplement", range: "U+0080 - U+00FF", start: 0x0080, end: 0x00FF },
+      { name: "Greek and Coptic", range: "U+0370 - U+03FF", start: 0x0370, end: 0x03FF },
+      { name: "Cyrillic", range: "U+0400 - U+04FF", start: 0x0400, end: 0x04FF },
+      { name: "Arabic", range: "U+0600 - U+06FF", start: 0x0600, end: 0x06FF },
+      { name: "Emoji", range: "U+1F600 - U+1F64F", start: 0x1F600, end: 0x1F64F }
     ];
 
     const blockGrid = document.getElementById("blockGrid");
+    const charGrid = document.getElementById("charGrid");
 
     blocks.forEach(block => {
       const div = document.createElement("div");
       div.className = "block";
       div.innerHTML = `<h3>${block.name}</h3><p>${block.range}</p>`;
-      div.onclick = () => alert(`You clicked ${block.name}! More coming soon.`);
+      div.onclick = () => loadCharacters(block);
       blockGrid.appendChild(div);
     });
+
+    function loadCharacters(block) {
+      charGrid.innerHTML = '';
+      for (let i = block.start; i <= block.end; i++) {
+        const char = String.fromCodePoint(i);
+        const box = document.createElement("div");
+        box.className = "char-box";
+        box.textContent = char;
+        box.title = `U+${i.toString(16).toUpperCase().padStart(4, '0')}`;
+        box.onclick = () => navigator.clipboard.writeText(char);
+        charGrid.appendChild(box);
+      }
+    }
   </script></body>
 </html>
