@@ -103,15 +103,12 @@
     .then(text => {
       const lines = text.split('\n');
       for (let line of lines) {
-        const [range, script] = line.split(';').map(s => s.trim());
-        if (!range || !script) continue;
-        let [start, end] = range.split('..');
+        const [rangePart, scriptPartRaw] = line.split(';').map(s => s.trim());
+        if (!rangePart || !scriptPartRaw) continue;
+        const script = scriptPartRaw.split('#')[0].trim(); // remove inline comment
+        let [start, end] = rangePart.split('..');
         if (!end) end = start;
         const s = parseInt(start, 16), e = parseInt(end, 16);
-        const [rangeRaw, scriptRaw] = line.split(';');
-if (!rangeRaw || !scriptRaw) continue;
-
-const script = scriptRaw.split('#')[0].trim(); // strip comments
         if (cp >= s && cp <= e) {
           document.getElementById('charScript').textContent = script;
           break;
