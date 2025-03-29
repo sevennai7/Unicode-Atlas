@@ -33,7 +33,7 @@ Unicode Atlas is a clean, modern, and powerful Unicode explorer. It lets you bro
 ## How to Use
 
 1. Download or clone this repo
-2. Open `index.html` in your browser (or host via GitHub Pages)
+2. Open `index.html` in your browser (or host via GitHub Pages, or click the website down there)
 3. Click on a block to see its characters
 4. Click a character to view detailed info
 5. Toggle dark mode and save favorites as you go!
@@ -46,6 +46,9 @@ Data sources:
 - [UnicodeData.txt](https://www.unicode.org/Public/UNIDATA/UnicodeData.txt)
 - [Blocks.txt](https://www.unicode.org/Public/UNIDATA/Blocks.txt)
 - [Scripts.txt](https://www.unicode.org/Public/UNIDATA/Scripts.txt)
+
+## Website
+[Unicode Atlas](https://sevennai7.github.io/Unicode-Atlas/index.html)
 
 ## License
 
