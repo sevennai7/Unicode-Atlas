@@ -108,6 +108,10 @@
         let [start, end] = range.split('..');
         if (!end) end = start;
         const s = parseInt(start, 16), e = parseInt(end, 16);
+        const [rangeRaw, scriptRaw] = line.split(';');
+if (!rangeRaw || !scriptRaw) continue;
+
+const script = scriptRaw.split('#')[0].trim(); // strip comments
         if (cp >= s && cp <= e) {
           document.getElementById('charScript').textContent = script;
           break;
