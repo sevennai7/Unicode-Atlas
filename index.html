@@ -2,182 +2,137 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Unicode Atlas</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
   <script src="unicode-blocks.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Inter', sans-serif;
       background: #f0f2f5;
-      color: #222;
+      color: #333;
       margin: 0;
       padding: 2em;
-      max-width: 1300px;
+      max-width: 1200px;
       margin: auto;
-      transition: background 0.3s, color 0.3s;
-    }
-    .dark-mode {
-      background: #1e1e1e;
-      color: #eee;
     }
     header {
       text-align: center;
       margin-bottom: 2em;
     }
     header h1 {
-      font-size: 3em;
-      margin: 0.3em;
-    }
-    header p {
-      font-style: italic;
-      color: #666;
-    }
-    .dark-mode header p {
-      color: #aaa;
+      font-size: 2.5em;
+      margin: 0.2em;
     }
     #searchBar {
       width: 100%;
-      padding: 0.75em;
-      font-size: 1.1em;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      margin-bottom: 1em;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    #planeFilter {
-      width: 100%;
-      padding: 0.6em;
+      padding: 0.75em 1em;
       font-size: 1em;
+      border-radius: 12px;
+      border: 1px solid #ccc;
       margin-bottom: 2em;
-      border-radius: 10px;
+      outline: none;
+      transition: box-shadow 0.3s, border-color 0.3s;
+    }
+    #searchBar:focus {
+      border-color: #5a8dee;
+      box-shadow: 0 0 8px rgba(90, 141, 238, 0.4);
     }
     .block-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1.5em;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1em;
     }
     .block {
       background: white;
-      padding: 1.5em;
-      border-radius: 16px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-      transition: transform 0.2s, box-shadow 0.2s;
+      padding: 1em;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: transform 0.2s, background 0.2s;
       cursor: pointer;
     }
-    .dark-mode .block {
-      background: #2a2a2a;
-      color: white;
-    }
     .block:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+      transform: scale(1.02);
+      background: #f9f9f9;
+    }
+    .block.highlight {
+      border: 2px solid #5a8dee;
+      background: #eef5ff;
     }
     .block h3 {
-      margin: 0 0 0.5em;
-      font-size: 1.3em;
+      margin: 0;
+      font-size: 1.1em;
     }
     .block p {
       margin: 0.3em 0;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.95em;
+      font-family: monospace;
     }
     .char-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
       gap: 0.4em;
-      margin-top: 3em;
+      margin-top: 2em;
     }
     .char-box {
       background: #fff;
       border: 1px solid #ccc;
       border-radius: 6px;
-      padding: 0.6em;
+      padding: 0.5em;
       text-align: center;
-      font-size: 1.4em;
-      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.3em;
       cursor: pointer;
       transition: background 0.2s, transform 0.2s;
     }
-    .dark-mode .char-box {
-      background: #3a3a3a;
-      border-color: #555;
-      color: #fff;
-    }
     .char-box:hover {
-      background: #eef;
+      background: #f0f0f0;
       transform: scale(1.1);
     }
-    .dark-toggle {
-      text-align: right;
-      margin-bottom: 1em;
-      cursor: pointer;
-      background: #ccc;
-      padding: 0.4em 1em;
-      border-radius: 6px;
-      display: inline-block;
-      font-size: 0.9em;
+    .search-wrapper {
+      position: relative;
     }
-    .dark-mode .dark-toggle {
-      background: #555;
-      color: white;
+    .search-wrapper::before {
+      content: '🔍';
+      position: absolute;
+      left: 1em;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1em;
     }
-    .panel {
-      margin-top: 3em;
-    }
-    .panel h2 {
-      font-size: 1.4em;
-      margin-bottom: 0.5em;
-    }
-    .panel .char-grid {
-      margin-top: 1em;
+    #searchBar {
+      padding-left: 2.5em;
     }
   </style>
 </head>
 <body>
-  <div class="dark-toggle" onclick="toggleDarkMode()">Toggle Dark Mode</div>
   <header>
     <h1>Unicode Atlas</h1>
-    <p>Explore the language of everything</p>
-  </header>  <input type="text" id="searchBar" placeholder="Search Unicode blocks or characters...">
-  <select id="planeFilter">
-    <option value="">All Unicode Planes</option>
-    <option value="BMP">BMP (0x0000 - 0xFFFF)</option>
-    <option value="SMP">SMP (0x10000 - 0x1FFFF)</option>
-    <option value="SIP">SIP (0x20000 - 0x2FFFF)</option>
-    <option value="TIP">TIP (0x30000 - 0x3FFFF)</option>
-  </select>  <div class="block-grid" id="blockGrid"></div>
-  <div id="charGrid" class="char-grid"></div>
-  <div class="panel">
-    <h2>Favorites</h2>
-    <div id="favoritesPanel" class="char-grid"></div>
-  </div>
-  <div class="panel">
-    <h2>Recently Viewed</h2>
-    <div id="recentPanel" class="char-grid"></div>
-  </div>  <script>
+    <p>Explore all the Unicode blocks and characters</p>
+  </header>  <div class="search-wrapper">
+    <input type="text" id="searchBar" placeholder="" autocomplete="off">
+  </div>  <div class="block-grid" id="blockGrid"></div>
+  <div id="charGrid" class="char-grid"></div>  <script>
     const blockGrid = document.getElementById("blockGrid");
     const charGrid = document.getElementById("charGrid");
-    const favoritesPanel = document.getElementById("favoritesPanel");
-    const recentPanel = document.getElementById("recentPanel");
     const searchBar = document.getElementById("searchBar");
-    const planeFilter = document.getElementById("planeFilter");
 
-    function getPlane(codepoint) {
-      if (codepoint <= 0xFFFF) return 'BMP';
-      if (codepoint <= 0x1FFFF) return 'SMP';
-      if (codepoint <= 0x2FFFF) return 'SIP';
-      if (codepoint <= 0x3FFFF) return 'TIP';
-      return 'Other';
-    }
+    const placeholders = [
+      "Enter a Unicode character or block.",
+      "Type a block name or emoji",
+      "Looking for Latin? Search: 'Basic Latin'.",
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ..."
+    ];
+    searchBar.placeholder = placeholders[Math.floor(Math.random() * placeholders.length)];
 
     function displayBlocks(filter = "") {
       blockGrid.innerHTML = "";
-      const plane = planeFilter.value;
       const filtered = unicodeBlocks.filter(block => {
-        const matchesName = block.name.toLowerCase().includes(filter.toLowerCase());
-        const matchesPlane = plane === "" || getPlane(block.start) === plane;
-        return matchesName && matchesPlane;
+        const previewChars = [];
+        for (let i = block.start; i <= block.end && previewChars.length < 5; i++) {
+          const char = String.fromCodePoint(i);
+          if (char.trim()) previewChars.push(char);
+        }
+        const matchText = block.name.toLowerCase() + ' ' + previewChars.join('').toLowerCase();
+        return matchText.includes(filter.toLowerCase());
       });
 
       filtered.forEach(block => {
@@ -186,14 +141,12 @@
           const char = String.fromCodePoint(i);
           if (char.trim()) previewChars.push(char);
         }
-        const count = block.end - block.start + 1;
         const div = document.createElement("div");
-        div.className = "block";
+        div.className = "block highlight";
         div.innerHTML = `
           <h3>${block.name}</h3>
           <p>U+${block.start.toString(16).toUpperCase()} - U+${block.end.toString(16).toUpperCase()}</p>
-          <p>Preview: ${previewChars.join(' ')}</p>
-          <p>${count} characters</p>
+          <p>${previewChars.join(' ')}</p>
         `;
         div.onclick = () => loadCharacters(block);
         blockGrid.appendChild(div);
@@ -212,54 +165,20 @@
         box.onclick = () => window.location.href = `letter.html?code=${codeHex}`;
         charGrid.appendChild(box);
       }
-      charGrid.scrollIntoView({ behavior: "smooth" });
     }
 
-    function loadStoredPanel(panelId, target) {
-      const stored = JSON.parse(localStorage.getItem(panelId) || "[]");
-      target.innerHTML = "";
-      stored.forEach(code => {
-        const cp = parseInt(code, 16);
-        const char = String.fromCodePoint(cp);
-        const box = document.createElement("div");
-        box.className = "char-box";
-        box.textContent = char;
-        box.title = `U+${code}`;
-        box.onclick = () => window.location.href = `letter.html?code=${code}`;
-        target.appendChild(box);
-      });
-    }
-
-    function toggleDarkMode() {
-      document.body.classList.toggle("dark-mode");
-    }
-
-    searchBar.addEventListener("input", () => {
-      displayBlocks(searchBar.value);
+    searchBar.addEventListener("input", (e) => {
+      displayBlocks(e.target.value);
       charGrid.innerHTML = "";
     });
 
-    planeFilter.addEventListener("change", () => {
-      displayBlocks(searchBar.value);
-      charGrid.innerHTML = "";
+    window.addEventListener("keydown", e => {
+      if (e.ctrlKey && e.key === "/") {
+        e.preventDefault();
+        searchBar.focus();
+      }
     });
 
     displayBlocks();
-    loadStoredPanel("favorites", favoritesPanel);
-    loadStoredPanel("recent", recentPanel);
-
-
-// Dark mode persistence logic
-function toggleDarkMode() {
-  const enabled = document.body.classList.toggle("dark-mode");
-  localStorage.setItem("darkMode", enabled);
-}
-
-// Apply saved mode on load
-if (localStorage.getItem("darkMode") === "true") {
-  document.body.classList.add("dark-mode");
-}
-    
-  </script>
-</body>
+  </script></body>
 </html>
