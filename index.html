@@ -27,6 +27,9 @@
       background: #333;
       border-color: #666;
     }
+    .dark-mode button {
+      background: #666;
+    }
     header {
       text-align: center;
       margin-bottom: 2em;
@@ -34,6 +37,21 @@
     header h1 {
       font-size: 2.5em;
       margin: 0.2em;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1em;
+    }
+    .top-bar button {
+      padding: 0.4em 1em;
+      font-size: 0.9em;
+      border-radius: 6px;
+      border: none;
+      background: #444;
+      color: white;
+      cursor: pointer;
     }
     #searchBar {
       width: 100%;
@@ -48,18 +66,6 @@
     #searchBar:focus {
       border-color: #5a8dee;
       box-shadow: 0 0 8px rgba(90, 141, 238, 0.4);
-    }
-    button {
-      padding: 0.5em 1em;
-      margin-bottom: 1em;
-      border: none;
-      background: #444;
-      color: white;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .dark-mode button {
-      background: #666;
     }
     .block-grid {
       display: grid;
@@ -109,7 +115,10 @@
   </style>
 </head>
 <body>
-  <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+  <div class="top-bar">
+    <div></div>
+    <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+  </div>
   <header>
     <h1>Unicode Atlas</h1>
     <p>Explore the language of everything</p>
