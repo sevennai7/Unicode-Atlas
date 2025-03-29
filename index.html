@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -37,7 +38,7 @@
     }
     header {
       text-align: center;
-      margin-bottom: 1em;
+      margin-bottom: 2em;
     }
     header h1 {
       font-size: 2.5em;
@@ -149,9 +150,13 @@
   <header>
     <h1>Unicode Atlas</h1>
     <p>Explore the language of everything</p>
-  </header>  <input type="text" id="searchBar" placeholder="Loading..." autocomplete="off">
+  </header>
+
+  <input type="text" id="searchBar" placeholder="Loading..." autocomplete="off">
   <div class="block-grid" id="blockGrid"></div>
-  <div id="charGrid" class="char-grid"></div>  <script>
+  <div id="charGrid" class="char-grid"></div>
+
+  <script>
     const blockGrid = document.getElementById("blockGrid");
     const charGrid = document.getElementById("charGrid");
     const searchBar = document.getElementById("searchBar");
@@ -222,7 +227,12 @@
           <p>Preview: ${previewChars.join(' ')}</p>
           <p>${block.end - block.start + 1} characters</p>
         `;
-        div.onclick = () => loadCharacters(block);
+        div.onclick = () => {
+          loadCharacters(block);
+          currentTab = "characters";
+          document.querySelectorAll(".tabs button").forEach(btn => btn.classList.remove("active"));
+          document.querySelector('.tabs button[onclick*="characters"]').classList.add("active");
+        };
         blockGrid.appendChild(div);
       });
     }
@@ -269,5 +279,6 @@
         searchBar.focus();
       }
     });
-  </script></body>
+  </script>
+</body>
 </html>
