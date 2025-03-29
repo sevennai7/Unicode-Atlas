@@ -1,7 +1,8 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Unicode Character Info</title>
   <style>
     body {
@@ -38,6 +39,7 @@
     <p><strong>Category:</strong> <span id="charCategory"></span></p>
     <p><strong>Copy:</strong> <button onclick="copyChar()">Copy to Clipboard</button></p>
   </div>
+
   <script>
     const blocks = [
       { name: "Basic Latin", start: 0x0000, end: 0x007F },
@@ -64,17 +66,15 @@
       document.getElementById('charBlock').textContent = '(Detecting...)';
       document.getElementById('charCategory').textContent = '(loading...)';
 
+      // Detect block
       const block = blocks.find(b => codepoint >= b.start && codepoint <= b.end);
-      if (block) {
-        document.getElementById('charBlock').textContent = block.name;
-      } else {
-        document.getElementById('charBlock').textContent = 'Unknown Block';
-      }
+      document.getElementById('charBlock').textContent = block ? block.name : 'Unknown Block';
 
-      fetch('https://unicode.org/Public/UNIDATA/UnicodeData.txt')
-        .then(response => response.text())
+      // Fetch from local UnicodeData.txt file
+      fetch("UnicodeData.txt")
+        .then(res => res.text())
         .then(text => {
-          const line = text.split('\n').find(l => l.startsWith(code.toUpperCase()));
+          const line = text.split('\\n').find(l => l.startsWith(code.toUpperCase()));
           if (line) {
             const parts = line.split(';');
             document.getElementById('charName').textContent = parts[1];
@@ -87,7 +87,7 @@
 
     function copyChar() {
       navigator.clipboard.writeText(String.fromCodePoint(parseInt(code, 16)));
-      alert("Character copied!");
+      alert(\"Character copied!\");
     }
   </script>
 </body>
