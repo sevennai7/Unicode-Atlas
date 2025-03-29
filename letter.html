@@ -6,81 +6,19 @@
   <script src="unicode-blocks.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #fdfdfd;
-      color: #333;
-      padding: 2em;
-      max-width: 800px;
-      margin: auto;
-      transition: background 0.3s, color 0.3s;
-    }
-    .dark-mode {
-      background: #1a1a1a;
-      color: #eee;
-    }
-    .char-display {
-      font-size: 5em;
-      text-align: center;
-      margin-bottom: 1em;
-    }
-    .info-box {
-      background: white;
-      padding: 1.5em;
-      border-radius: 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
-      margin-bottom: 1em;
-    }
-    .dark-mode .info-box {
-      background: #2b2b2b;
-      color: #eee;
-    }
-    .info-title {
-      font-size: 1.6em;
-      font-weight: bold;
-      margin-bottom: 1em;
-      text-align: center;
-    }
-    .info-line {
-      margin: 0.6em 0;
-      font-size: 1.1em;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .info-line strong {
-      display: inline-block;
-      width: 150px;
-      font-weight: 600;
-    }
-    button {
-      padding: 0.6em 1.2em;
-      font-size: 1em;
-      background: #333;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 1em;
-      transition: background 0.2s;
-    }
-    button:hover {
-      background: #000;
-    }
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 1em;
-    }
-    .dark-toggle {
-      cursor: pointer;
-      font-size: 0.9em;
-      background: #ccc;
-      border-radius: 5px;
-      padding: 0.3em 0.8em;
-    }
-    .dark-mode .dark-toggle {
-      background: #555;
-      color: white;
-    }
+    body { font-family: 'Inter', sans-serif; background: #fdfdfd; color: #333; padding: 2em; max-width: 800px; margin: auto; transition: background 0.3s, color 0.3s; }
+    .dark-mode { background: #1a1a1a; color: #eee; }
+    .char-display { font-size: 5em; text-align: center; margin-bottom: 1em; }
+    .info-box { background: white; padding: 1.5em; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); margin-bottom: 1em; }
+    .dark-mode .info-box { background: #2b2b2b; color: #eee; }
+    .info-title { font-size: 1.6em; font-weight: bold; margin-bottom: 1em; text-align: center; }
+    .info-line { margin: 0.6em 0; font-size: 1.1em; font-family: 'JetBrains Mono', monospace; }
+    .info-line strong { display: inline-block; width: 150px; font-weight: 600; }
+    button { padding: 0.6em 1.2em; font-size: 1em; background: #333; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 1em; transition: background 0.2s; }
+    button:hover { background: #000; }
+    .top-bar { display: flex; justify-content: space-between; margin-bottom: 1em; }
+    .dark-toggle { cursor: pointer; font-size: 0.9em; background: #ccc; border-radius: 5px; padding: 0.3em 0.8em; }
+    .dark-mode .dark-toggle { background: #555; color: white; }
   </style>
 </head>
 <body>
@@ -116,28 +54,39 @@
     const favBtn = document.getElementById("favBtn");if (!paddedCode) {
   document.body.innerHTML = '<p>No character code provided in URL.</p>';
 } else {
-  const codepoint = parseInt(paddedCode, 16);
-  const char = String.fromCodePoint(codepoint);
+  const cp = parseInt(paddedCode, 16);
+  const char = String.fromCodePoint(cp);
+
   document.getElementById('charSymbol').textContent = char;
   document.getElementById('charCode').textContent = char;
   document.getElementById('codepoint').textContent = `U+${paddedCode}`;
   document.getElementById('linkCodepoints').href = `https://codepoints.net/U+${paddedCode}`;
 
-  const block = unicodeBlocks.find(b => codepoint >= b.start && codepoint <= b.end);
+  const block = unicodeBlocks.find(b => cp >= b.start && cp <= b.end);
   document.getElementById('charBlock').textContent = block ? block.name : 'Unknown Block';
 
-  const recent = JSON.parse(localStorage.getItem("recent") || "[]");
-  const updated = [paddedCode, ...recent.filter(c => c !== paddedCode)].slice(0, 10);
-  localStorage.setItem("recent", JSON.stringify(updated));
+  const plane = cp <= 0xFFFF ? "BMP (Basic Multilingual Plane)" :
+                cp <= 0x1FFFF ? "SMP (Supplementary Multilingual Plane)" :
+                cp <= 0x2FFFF ? "SIP (Supplementary Ideographic Plane)" :
+                cp <= 0x3FFFF ? "TIP (Tertiary Ideographic Plane)" : "Unknown";
+  document.getElementById('charPlane').textContent = plane;
 
-  const favs = JSON.parse(localStorage.getItem("favorites") || "[]");
-  favBtn.textContent = favs.includes(paddedCode) ? "★ Remove Favorite" : "☆ Add Favorite";
+  const utf8Bytes = Array.from(new TextEncoder().encode(char)).map(b => b.toString(16).padStart(2, '0')).join(' ');
+  document.getElementById('utf8').textContent = utf8Bytes.toUpperCase();
+
+  const utf16Units = [];
+  for (const unit of new TextEncoder('utf-16le').encode(char)) {
+    utf16Units.push(unit.toString(16).padStart(2, '0'));
+  }
+  const utf16 = utf16Units.map((u, i) => i % 2 === 1 ? utf16Units[i - 1] + u : null).filter(x => x).join(' ').toUpperCase();
+  document.getElementById('utf16').textContent = utf16;
+
+  document.getElementById('htmlEntity').textContent = `&#${cp};`;
 
   fetch("UnicodeData.txt")
     .then(res => res.text())
     .then(text => {
-      const lines = text.split('\n');
-      const line = lines.find(l => l.startsWith(paddedCode));
+      const line = text.split('\n').find(l => l.startsWith(paddedCode));
       if (line) {
         const parts = line.split(';');
         document.getElementById('charName').textContent = parts[1] || '(N/A)';
@@ -146,7 +95,8 @@
         document.getElementById('charBidi').textContent = parts[4] || '(N/A)';
         document.getElementById('charMirrored').textContent = parts[9] === 'Y' ? 'Yes' : 'No';
       }
-    });
+    })
+    .catch(err => console.error("UnicodeData.txt failed to load", err));
 
   fetch("Scripts.txt")
     .then(res => res.text())
@@ -158,32 +108,19 @@
         let [start, end] = range.split('..');
         if (!end) end = start;
         const s = parseInt(start, 16), e = parseInt(end, 16);
-        if (codepoint >= s && codepoint <= e) {
+        if (cp >= s && cp <= e) {
           document.getElementById('charScript').textContent = script;
           break;
         }
       }
-    });
+    })
+    .catch(err => console.error("Scripts.txt failed to load", err));
 
-  const plane = codepoint <= 0xFFFF ? "BMP (Basic Multilingual Plane)" :
-                codepoint <= 0x1FFFF ? "SMP (Supplementary Multilingual Plane)" :
-                codepoint <= 0x2FFFF ? "SIP (Supplementary Ideographic Plane)" :
-                codepoint <= 0x3FFFF ? "TIP (Tertiary Ideographic Plane)" : "Unknown";
-  document.getElementById('charPlane').textContent = plane;
-
-  const encoder = new TextEncoder();
-  const utf8Bytes = Array.from(encoder.encode(char)).map(b => b.toString(16).padStart(2, '0')).join(' ');
-  document.getElementById('utf8').textContent = utf8Bytes.toUpperCase();
-
-  const utf16Units = [];
-  for (const unit of new TextEncoder('utf-16le').encode(char)) {
-    utf16Units.push(unit.toString(16).padStart(2, '0'));
-  }
-  const utf16 = utf16Units.map((u, i) => i % 2 === 1 ? utf16Units[i - 1] + u : null).filter(x => x).join(' ').toUpperCase();
-  document.getElementById('utf16').textContent = utf16;
-
-  const htmlEntity = `&#${codepoint};`;
-  document.getElementById('htmlEntity').textContent = htmlEntity;
+  const recent = JSON.parse(localStorage.getItem("recent") || "[]");
+  const updated = [paddedCode, ...recent.filter(c => c !== paddedCode)].slice(0, 10);
+  localStorage.setItem("recent", JSON.stringify(updated));
+  const favs = JSON.parse(localStorage.getItem("favorites") || "[]");
+  favBtn.textContent = favs.includes(paddedCode) ? "★ Remove Favorite" : "☆ Add Favorite";
 }
 
 function copyChar() {
@@ -204,7 +141,6 @@ function toggleDarkMode() {
   const enabled = document.body.classList.toggle("dark-mode");
   localStorage.setItem("darkMode", enabled);
 }
-
 if (localStorage.getItem("darkMode") === "true") {
   document.body.classList.add("dark-mode");
 }
