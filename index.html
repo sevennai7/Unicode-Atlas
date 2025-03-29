@@ -1,10 +1,9 @@
-<!-- index.html -->
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Unicode Atlas</title>
-  <script src="unicode-blocks.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, sans-serif;
@@ -14,19 +13,10 @@
       padding: 2em;
       max-width: 1200px;
       margin: auto;
-      transition: background 0.3s, color 0.3s;
-    }
-    .dark-mode {
-      background: #1a1a1a;
-      color: #eee;
     }
     header {
       text-align: center;
       margin-bottom: 2em;
-    }
-    header h1 {
-      font-size: 2.5em;
-      margin: 0.2em;
     }
     #searchBar {
       width: 100%;
@@ -49,20 +39,8 @@
       transition: transform 0.2s;
       cursor: pointer;
     }
-    .dark-mode .block {
-      background: #2b2b2b;
-      color: white;
-    }
     .block:hover {
       transform: scale(1.02);
-    }
-    .block h3 {
-      margin: 0;
-      font-size: 1.1em;
-    }
-    .block p {
-      margin: 0.3em 0;
-      font-family: monospace;
     }
     .char-grid {
       display: grid;
@@ -80,89 +58,78 @@
       cursor: pointer;
       transition: background 0.2s, transform 0.2s;
     }
-    .dark-mode .char-box {
-      background: #3a3a3a;
-    }
     .char-box:hover {
-      background: #e0e0e0;
+      background: #f0f0f0;
       transform: scale(1.1);
-    }
-    .dark-toggle {
-      text-align: right;
-      margin-bottom: 1em;
-      cursor: pointer;
-      background: #ccc;
-      padding: 0.4em 1em;
-      border-radius: 6px;
-      display: inline-block;
-    }
-    .dark-mode .dark-toggle {
-      background: #555;
-      color: white;
     }
   </style>
 </head>
 <body>
-  <div class="dark-toggle" onclick="toggleDarkMode()">Toggle Dark Mode</div>
   <header>
     <h1>Unicode Atlas</h1>
-    <p>Explore all the Unicode blocks and characters</p>
+    <p>Mini test — hardcoded blocks</p>
   </header>
+
   <input type="text" id="searchBar" placeholder="Search blocks by name...">
   <div class="block-grid" id="blockGrid"></div>
   <div id="charGrid" class="char-grid"></div>
+
   <script>
+    // Mini version of unicodeBlocks for testing
+    const unicodeBlocks = [
+      { name: "Basic Latin", start: 0x0000, end: 0x007F },
+      { name: "Latin-1 Supplement", start: 0x0080, end: 0x00FF },
+      { name: "Greek and Coptic", start: 0x0370, end: 0x03FF }
+    ];
+
     const blockGrid = document.getElementById("blockGrid");
     const charGrid = document.getElementById("charGrid");
-    const searchBar = document.getElementById("searchBar");function displayBlocks(filter = "") {
-  blockGrid.innerHTML = "";
-  const filtered = unicodeBlocks.filter(block =>
-    block.name.toLowerCase().includes(filter.toLowerCase())
-  );
+    const searchBar = document.getElementById("searchBar");
 
-  filtered.forEach(block => {
-    const previewChars = [];
-    for (let i = block.start; i <= block.end && previewChars.length < 5; i++) {
-      const char = String.fromCodePoint(i);
-      if (char.trim()) previewChars.push(char);
+    function displayBlocks(filter = "") {
+      blockGrid.innerHTML = "";
+      const filtered = unicodeBlocks.filter(block =>
+        block.name.toLowerCase().includes(filter.toLowerCase())
+      );
+
+      filtered.forEach(block => {
+        const previewChars = [];
+        for (let i = block.start; i <= block.end && previewChars.length < 5; i++) {
+          const char = String.fromCodePoint(i);
+          if (char.trim()) previewChars.push(char);
+        }
+        const div = document.createElement("div");
+        div.className = "block";
+        div.innerHTML = `
+          <h3>${block.name}</h3>
+          <p>U+${block.start.toString(16).toUpperCase()} - U+${block.end.toString(16).toUpperCase()}</p>
+          <p>${previewChars.join(' ')}</p>
+        `;
+        div.onclick = () => loadCharacters(block);
+        blockGrid.appendChild(div);
+      });
     }
-    const div = document.createElement("div");
-    div.className = "block";
-    div.innerHTML = `
-      <h3>${block.name}</h3>
-      <p>U+${block.start.toString(16).toUpperCase()} - U+${block.end.toString(16).toUpperCase()}</p>
-      <p>${previewChars.join(' ')}</p>
-    `;
-    div.onclick = () => loadCharacters(block);
-    blockGrid.appendChild(div);
-  });
-}
 
-function loadCharacters(block) {
-  charGrid.innerHTML = "";
-  for (let i = block.start; i <= block.end; i++) {
-    const codeHex = i.toString(16).toUpperCase().padStart(4, '0');
-    const char = String.fromCodePoint(i);
-    const box = document.createElement("div");
-    box.className = "char-box";
-    box.textContent = char;
-    box.title = `U+${codeHex}`;
-    box.onclick = () => window.location.href = `letter.html?code=${codeHex}`;
-    charGrid.appendChild(box);
-  }
-}
+    function loadCharacters(block) {
+      charGrid.innerHTML = "";
+      for (let i = block.start; i <= block.end; i++) {
+        const codeHex = i.toString(16).toUpperCase().padStart(4, '0');
+        const char = String.fromCodePoint(i);
+        const box = document.createElement("div");
+        box.className = "char-box";
+        box.textContent = char;
+        box.title = `U+${codeHex}`;
+        box.onclick = () => window.location.href = `letter.html?code=${codeHex}`;
+        charGrid.appendChild(box);
+      }
+    }
 
-searchBar.addEventListener("input", (e) => {
-  displayBlocks(e.target.value);
-  charGrid.innerHTML = "";
-});
+    searchBar.addEventListener("input", (e) => {
+      displayBlocks(e.target.value);
+      charGrid.innerHTML = "";
+    });
 
-function toggleDarkMode() {
-  document.body.classList.toggle("dark-mode");
-}
-
-displayBlocks();
-
+    displayBlocks();
   </script>
 </body>
 </html>
