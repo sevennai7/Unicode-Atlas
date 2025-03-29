@@ -1,205 +1,252 @@
-<!-- START OF: letter.html--><!DOCTYPE html><html lang="en">
+<!-- START OF: index.html-->
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Unicode Character Info</title>
-  <script src="unicode-blocks.js"></script>
+  <title>Unicode Atlas</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <script src="unicode-blocks.js"></script>
   <style>
     body {
       font-family: 'Inter', sans-serif;
-      background: #fdfdfd;
-      color: #333;
+      background: #f0f2f5;
+      color: #222;
+      margin: 0;
       padding: 2em;
-      max-width: 800px;
+      max-width: 1300px;
       margin: auto;
       transition: background 0.3s, color 0.3s;
     }
     .dark-mode {
-      background: #1a1a1a;
+      background: #1e1e1e;
       color: #eee;
     }
-    .char-display {
-      font-size: 5em;
+    header {
       text-align: center;
-      margin-bottom: 1em;
+      margin-bottom: 2em;
     }
-    .info-box {
+    header h1 {
+      font-size: 3em;
+      margin: 0.3em;
+    }
+    header p {
+      font-style: italic;
+      color: #666;
+    }
+    .dark-mode header p {
+      color: #aaa;
+    }
+    #searchBar {
+      width: 100%;
+      padding: 0.75em;
+      font-size: 1.1em;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      margin-bottom: 1em;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    #planeFilter {
+      width: 100%;
+      padding: 0.6em;
+      font-size: 1em;
+      margin-bottom: 2em;
+      border-radius: 10px;
+    }
+    .block-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5em;
+    }
+    .block {
       background: white;
       padding: 1.5em;
       border-radius: 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
-      margin-bottom: 1em;
-    }
-    .dark-mode .info-box {
-      background: #2b2b2b;
-      color: #eee;
-    }
-    .info-title {
-      font-size: 1.6em;
-      font-weight: bold;
-      margin-bottom: 1em;
-      text-align: center;
-    }
-    .info-line {
-      margin: 0.6em 0;
-      font-size: 1.1em;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .info-line strong {
-      display: inline-block;
-      width: 150px;
-      font-weight: 600;
-    }
-    button {
-      padding: 0.6em 1.2em;
-      font-size: 1em;
-      background: #333;
-      color: white;
-      border: none;
-      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+      transition: transform 0.2s, box-shadow 0.2s;
       cursor: pointer;
-      margin-top: 1em;
-      transition: background 0.2s;
     }
-    button:hover {
-      background: #000;
+    .dark-mode .block {
+      background: #2a2a2a;
+      color: white;
     }
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 1em;
+    .block:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+    }
+    .block h3 {
+      margin: 0 0 0.5em;
+      font-size: 1.3em;
+    }
+    .block p {
+      margin: 0.3em 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95em;
+    }
+    .char-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+      gap: 0.4em;
+      margin-top: 3em;
+    }
+    .char-box {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 0.6em;
+      text-align: center;
+      font-size: 1.4em;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .dark-mode .char-box {
+      background: #3a3a3a;
+      border-color: #555;
+      color: #fff;
+    }
+    .char-box:hover {
+      background: #eef;
+      transform: scale(1.1);
     }
     .dark-toggle {
+      text-align: right;
+      margin-bottom: 1em;
       cursor: pointer;
-      font-size: 0.9em;
       background: #ccc;
-      border-radius: 5px;
-      padding: 0.3em 0.8em;
+      padding: 0.4em 1em;
+      border-radius: 6px;
+      display: inline-block;
+      font-size: 0.9em;
     }
     .dark-mode .dark-toggle {
       background: #555;
       color: white;
     }
+    .panel {
+      margin-top: 3em;
+    }
+    .panel h2 {
+      font-size: 1.4em;
+      margin-bottom: 0.5em;
+    }
+    .panel .char-grid {
+      margin-top: 1em;
+    }
   </style>
 </head>
 <body>
-  <div class="top-bar">
-    <button onclick="window.location.href='index.html'">← Back to Unicode Blocks</button>
-    <div class="dark-toggle" onclick="toggleDarkMode()">Toggle Dark Mode</div>
+  <div class="dark-toggle" onclick="toggleDarkMode()">Toggle Dark Mode</div>
+  <header>
+    <h1>Unicode Atlas</h1>
+    <p>Explore the language of everything</p>
+  </header>  <input type="text" id="searchBar" placeholder="Search Unicode blocks or characters...">
+  <select id="planeFilter">
+    <option value="">All Unicode Planes</option>
+    <option value="BMP">BMP (0x0000 - 0xFFFF)</option>
+    <option value="SMP">SMP (0x10000 - 0x1FFFF)</option>
+    <option value="SIP">SIP (0x20000 - 0x2FFFF)</option>
+    <option value="TIP">TIP (0x30000 - 0x3FFFF)</option>
+  </select>  <div class="block-grid" id="blockGrid"></div>
+  <div id="charGrid" class="char-grid"></div>
+  <div class="panel">
+    <h2>Favorites</h2>
+    <div id="favoritesPanel" class="char-grid"></div>
   </div>
-  <div class="char-display" id="charSymbol"></div>
-  <div class="info-box">
-    <div class="info-title">Character Info</div>
-    <div class="info-line"><strong>Character:</strong> <span id="charCode"></span></div>
-    <div class="info-line"><strong>Codepoint:</strong> <span id="codepoint"></span></div>
-    <div class="info-line"><strong>Name:</strong> <span id="charName">(loading...)</span></div>
-    <div class="info-line"><strong>Block:</strong> <span id="charBlock">(Detecting...)</span></div>
-    <div class="info-line"><strong>Category:</strong> <span id="charCategory">(loading...)</span></div>
-    <div class="info-line"><strong>Plane:</strong> <span id="charPlane"></span></div>
-    <div class="info-line"><strong>UTF-8:</strong> <span id="utf8"></span></div>
-    <div class="info-line"><strong>UTF-16:</strong> <span id="utf16"></span></div>
-    <div class="info-line"><strong>HTML Entity:</strong> <span id="htmlEntity"></span></div>
-    <div class="info-line"><strong>Script:</strong> <span id="charScript">(loading...)</span></div>
-    <div class="info-line"><strong>Bidi Class:</strong> <span id="charBidi">(loading...)</span></div>
-    <div class="info-line"><strong>Mirrored:</strong> <span id="charMirrored">(loading...)</span></div>
-    <div class="info-line"><strong>Combining:</strong> <span id="charCombining">(loading...)</span></div>
-    <div class="info-line"><strong>Actions:</strong> 
-      <button onclick="copyChar()">Copy</button>
-      <button onclick="toggleFavorite()" id="favBtn">(loading...)</button>
-    </div>
-    <div class="info-line"><strong>More Info:</strong> <a id="linkCodepoints" target="_blank">Codepoints.net</a></div>
-  </div>
-  <script>
-    const code = new URLSearchParams(window.location.search).get('code');
-    const paddedCode = code?.toUpperCase().padStart(4, '0');
-    const favBtn = document.getElementById("favBtn");if (!paddedCode) {
-  document.body.innerHTML = '<p>No character code provided in URL.</p>';
-} else {
-  const codepoint = parseInt(paddedCode, 16);
-  const char = String.fromCodePoint(codepoint);
-  document.getElementById('charSymbol').textContent = char;
-  document.getElementById('charCode').textContent = char;
-  document.getElementById('codepoint').textContent = `U+${paddedCode}`;
-  document.getElementById('linkCodepoints').href = `https://codepoints.net/U+${paddedCode}`;
+  <div class="panel">
+    <h2>Recently Viewed</h2>
+    <div id="recentPanel" class="char-grid"></div>
+  </div>  <script>
+    const blockGrid = document.getElementById("blockGrid");
+    const charGrid = document.getElementById("charGrid");
+    const favoritesPanel = document.getElementById("favoritesPanel");
+    const recentPanel = document.getElementById("recentPanel");
+    const searchBar = document.getElementById("searchBar");
+    const planeFilter = document.getElementById("planeFilter");
 
-  const block = unicodeBlocks.find(b => codepoint >= b.start && codepoint <= b.end);
-  document.getElementById('charBlock').textContent = block ? block.name : 'Unknown Block';
+    function getPlane(codepoint) {
+      if (codepoint <= 0xFFFF) return 'BMP';
+      if (codepoint <= 0x1FFFF) return 'SMP';
+      if (codepoint <= 0x2FFFF) return 'SIP';
+      if (codepoint <= 0x3FFFF) return 'TIP';
+      return 'Other';
+    }
 
-  const recent = JSON.parse(localStorage.getItem("recent") || "[]");
-  const updated = [paddedCode, ...recent.filter(c => c !== paddedCode)].slice(0, 10);
-  localStorage.setItem("recent", JSON.stringify(updated));
+    function displayBlocks(filter = "") {
+      blockGrid.innerHTML = "";
+      const plane = planeFilter.value;
+      const filtered = unicodeBlocks.filter(block => {
+        const matchesName = block.name.toLowerCase().includes(filter.toLowerCase());
+        const matchesPlane = plane === "" || getPlane(block.start) === plane;
+        return matchesName && matchesPlane;
+      });
 
-  const favs = JSON.parse(localStorage.getItem("favorites") || "[]");
-  favBtn.textContent = favs.includes(paddedCode) ? "★ Remove Favorite" : "☆ Add Favorite";
-
-  fetch("UnicodeData.txt")
-    .then(res => res.text())
-    .then(text => {
-      const line = text.split('\n').find(l => l.startsWith(paddedCode));
-      if (line) {
-        const parts = line.split(';');
-        document.getElementById('charName').textContent = parts[1];
-        document.getElementById('charCategory').textContent = parts[2];
-        document.getElementById('charCombining').textContent = parts[3];
-        document.getElementById('charBidi').textContent = parts[4];
-        document.getElementById('charMirrored').textContent = parts[9] === 'Y' ? 'Yes' : 'No';
-      }
-    });
-
-  fetch("Scripts.txt")
-    .then(res => res.text())
-    .then(text => {
-      const lines = text.split('\n');
-      for (let line of lines) {
-        const [range, script] = line.split(';').map(s => s.trim());
-        if (!range || !script) continue;
-        let [start, end] = range.split('..');
-        if (!end) end = start;
-        const s = parseInt(start, 16), e = parseInt(end, 16);
-        if (codepoint >= s && codepoint <= e) {
-          document.getElementById('charScript').textContent = script;
-          break;
+      filtered.forEach(block => {
+        const previewChars = [];
+        for (let i = block.start; i <= block.end && previewChars.length < 5; i++) {
+          const char = String.fromCodePoint(i);
+          if (char.trim()) previewChars.push(char);
         }
+        const count = block.end - block.start + 1;
+        const div = document.createElement("div");
+        div.className = "block";
+        div.innerHTML = `
+          <h3>${block.name}</h3>
+          <p>U+${block.start.toString(16).toUpperCase()} - U+${block.end.toString(16).toUpperCase()}</p>
+          <p>Preview: ${previewChars.join(' ')}</p>
+          <p>${count} characters</p>
+        `;
+        div.onclick = () => loadCharacters(block);
+        blockGrid.appendChild(div);
+      });
+    }
+
+    function loadCharacters(block) {
+      charGrid.innerHTML = "";
+      for (let i = block.start; i <= block.end; i++) {
+        const codeHex = i.toString(16).toUpperCase().padStart(4, '0');
+        const char = String.fromCodePoint(i);
+        const box = document.createElement("div");
+        box.className = "char-box";
+        box.textContent = char;
+        box.title = `U+${codeHex}`;
+        box.onclick = () => window.location.href = `letter.html?code=${codeHex}`;
+        charGrid.appendChild(box);
       }
+      charGrid.scrollIntoView({ behavior: "smooth" });
+    }
+
+    function loadStoredPanel(panelId, target) {
+      const stored = JSON.parse(localStorage.getItem(panelId) || "[]");
+      target.innerHTML = "";
+      stored.forEach(code => {
+        const cp = parseInt(code, 16);
+        const char = String.fromCodePoint(cp);
+        const box = document.createElement("div");
+        box.className = "char-box";
+        box.textContent = char;
+        box.title = `U+${code}`;
+        box.onclick = () => window.location.href = `letter.html?code=${code}`;
+        target.appendChild(box);
+      });
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+    }
+
+    searchBar.addEventListener("input", () => {
+      displayBlocks(searchBar.value);
+      charGrid.innerHTML = "";
     });
 
-  const plane = codepoint <= 0xFFFF ? "BMP (Basic Multilingual Plane)" :
-                codepoint <= 0x1FFFF ? "SMP (Supplementary Multilingual Plane)" :
-                codepoint <= 0x2FFFF ? "SIP (Supplementary Ideographic Plane)" :
-                codepoint <= 0x3FFFF ? "TIP (Tertiary Ideographic Plane)" : "Unknown";
-  document.getElementById('charPlane').textContent = plane;
+    planeFilter.addEventListener("change", () => {
+      displayBlocks(searchBar.value);
+      charGrid.innerHTML = "";
+    });
 
-  const encoder = new TextEncoder();
-  const utf8Bytes = Array.from(encoder.encode(char)).map(b => b.toString(16).padStart(2, '0')).join(' ');
-  document.getElementById('utf8').textContent = utf8Bytes.toUpperCase();
-
-  const utf16 = Array.from(char).map(c => c.charCodeAt(0).toString(16).padStart(4, '0')).join(' ');
-  document.getElementById('utf16').textContent = utf16.toUpperCase();
-
-  const htmlEntity = `&#${codepoint};`;
-  document.getElementById('htmlEntity').textContent = htmlEntity;
-}
-
-function copyChar() {
-  navigator.clipboard.writeText(String.fromCodePoint(parseInt(code, 16)));
-  alert("Character copied!");
-}
-
-function toggleDarkMode() {
-  document.body.classList.toggle("dark-mode");
-}
-
-function toggleFavorite() {
-  const favs = JSON.parse(localStorage.getItem("favorites") || "[]");
-  const idx = favs.indexOf(paddedCode);
-  if (idx >= 0) favs.splice(idx, 1);
-  else favs.unshift(paddedCode);
-  localStorage.setItem("favorites", JSON.stringify(favs));
-  favBtn.textContent = favs.includes(paddedCode) ? "★ Remove Favorite" : "☆ Add Favorite";
-}
-
-  </script>
-</body>
+    displayBlocks();
+    loadStoredPanel("favorites", favoritesPanel);
+    loadStoredPanel("recent", recentPanel);
+  </script></body>
 </html>
-<!-- END OF: letter.html -->
+<!-- END OF: index.html -->
