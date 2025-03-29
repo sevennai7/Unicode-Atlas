@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -108,7 +107,7 @@
     <h1>Unicode Atlas</h1>
     <p>Explore all the Unicode blocks and characters</p>
   </header>  <div class="search-wrapper">
-    <input type="text" id="searchBar" placeholder="" autocomplete="off">
+    <input type="text" id="searchBar" placeholder="Loading..." autocomplete="off">
   </div>  <div class="block-grid" id="blockGrid"></div>
   <div id="charGrid" class="char-grid"></div>  <script>
     const blockGrid = document.getElementById("blockGrid");
@@ -118,10 +117,19 @@
     const placeholders = [
       "Enter a Unicode character or block.",
       "Type a block name or emoji",
-      "Looking for Latin? Search: 'Basic Latin'.",
+      "Looking for Latin? Search: \"Basic Latin\".",
       "ABCDEFGHIJKLMNOPQRSTUVWXYZ..."
     ];
-    searchBar.placeholder = placeholders[Math.floor(Math.random() * placeholders.length)];
+
+    function updatePlaceholder() {
+      const random = Math.floor(Math.random() * placeholders.length);
+      searchBar.placeholder = placeholders[random];
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      updatePlaceholder();
+      setInterval(updatePlaceholder, 15000);
+    });
 
     function displayBlocks(filter = "") {
       blockGrid.innerHTML = "";
@@ -146,7 +154,8 @@
         div.innerHTML = `
           <h3>${block.name}</h3>
           <p>U+${block.start.toString(16).toUpperCase()} - U+${block.end.toString(16).toUpperCase()}</p>
-          <p>${previewChars.join(' ')}</p>
+          <p>Preview: ${previewChars.join(' ')}</p>
+          <p>${block.end - block.start + 1} characters</p>
         `;
         div.onclick = () => loadCharacters(block);
         blockGrid.appendChild(div);
