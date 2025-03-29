@@ -6,25 +6,50 @@
   <title>Unicode Character Info</title>
   <style>
     body {
-      font-family: sans-serif;
-      background: #f9f9f9;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: linear-gradient(to bottom right, #f9f9f9, #fff);
       color: #333;
       padding: 2em;
+      max-width: 700px;
+      margin: auto;
     }
     .char-display {
-      font-size: 4em;
+      font-size: 5em;
       text-align: center;
+      margin-bottom: 1em;
     }
     .info-box {
       background: white;
-      padding: 1em;
-      margin-top: 1em;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 1.5em;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     .info-title {
+      font-size: 1.4em;
       font-weight: bold;
+      margin-bottom: 1em;
+      text-align: center;
+    }
+    .info-line {
+      margin: 0.5em 0;
+      font-size: 1.1em;
+    }
+    .info-line strong {
+      display: inline-block;
+      width: 110px;
+    }
+    button {
+      padding: 0.5em 1em;
+      font-size: 1em;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
       margin-top: 1em;
+    }
+    button:hover {
+      background: #222;
     }
   </style>
 </head>
@@ -32,12 +57,12 @@
   <div class="char-display" id="charSymbol"></div>
   <div class="info-box">
     <div class="info-title">Character Info</div>
-    <p><strong>Character:</strong> <span id="charCode"></span></p>
-    <p><strong>Codepoint:</strong> <span id="codepoint"></span></p>
-    <p><strong>Name:</strong> <span id="charName"></span></p>
-    <p><strong>Block:</strong> <span id="charBlock"></span></p>
-    <p><strong>Category:</strong> <span id="charCategory"></span></p>
-    <p><strong>Copy:</strong> <button onclick="copyChar()">Copy to Clipboard</button></p>
+    <div class="info-line"><strong>Character:</strong> <span id="charCode"></span></div>
+    <div class="info-line"><strong>Codepoint:</strong> <span id="codepoint"></span></div>
+    <div class="info-line"><strong>Name:</strong> <span id="charName">(loading...)</span></div>
+    <div class="info-line"><strong>Block:</strong> <span id="charBlock">(Detecting...)</span></div>
+    <div class="info-line"><strong>Category:</strong> <span id="charCategory">(loading...)</span></div>
+    <div class="info-line"><strong>Copy:</strong> <button onclick="copyChar()">Copy to Clipboard</button></div>
   </div>
 
   <script>
@@ -56,38 +81,40 @@
     if (!code) {
       document.body.innerHTML = '<p>No character code provided.</p>';
     } else {
-      const codepoint = parseInt(code, 16);
+      const paddedCode = code.toUpperCase().padStart(4, '0');
+      const codepoint = parseInt(paddedCode, 16);
       const char = String.fromCodePoint(codepoint);
 
       document.getElementById('charSymbol').textContent = char;
       document.getElementById('charCode').textContent = char;
-      document.getElementById('codepoint').textContent = `U+${code.toUpperCase()}`;
-      document.getElementById('charName').textContent = '(loading...)';
-      document.getElementById('charBlock').textContent = '(Detecting...)';
-      document.getElementById('charCategory').textContent = '(loading...)';
+      document.getElementById('codepoint').textContent = `U+${paddedCode}`;
 
-      // Detect block
       const block = blocks.find(b => codepoint >= b.start && codepoint <= b.end);
       document.getElementById('charBlock').textContent = block ? block.name : 'Unknown Block';
 
-      // Fetch from local UnicodeData.txt file
       fetch("UnicodeData.txt")
         .then(res => res.text())
         .then(text => {
-          const line = text.split('\\n').find(l => l.startsWith(code.toUpperCase()));
+          const lines = text.split('\n');
+          const line = lines.find(l => l.startsWith(paddedCode));
           if (line) {
             const parts = line.split(';');
             document.getElementById('charName').textContent = parts[1];
             document.getElementById('charCategory').textContent = parts[2];
           } else {
             document.getElementById('charName').textContent = '(Name not found)';
+            document.getElementById('charCategory').textContent = '(Unknown)';
           }
         });
     }
 
     function copyChar() {
-      navigator.clipboard.writeText(String.fromCodePoint(parseInt(code, 16)));
-      alert(\"Character copied!\");
+      const code = new URLSearchParams(window.location.search).get('code');
+      if (code) {
+        const char = String.fromCodePoint(parseInt(code, 16));
+        navigator.clipboard.writeText(char);
+        alert(`Copied: ${char}`);
+      }
     }
   </script>
 </body>
