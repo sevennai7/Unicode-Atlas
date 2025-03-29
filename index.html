@@ -1,168 +1,168 @@
-<!DOCTYPE html>
-<html lang="en">
+<!-- index.html -->
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Unicode Atlas</title>
+  <script src="unicode-blocks.js"></script>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to bottom right, #eef2f3, #ffffff);
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: #f0f2f5;
       color: #333;
       margin: 0;
-      padding: 0;
-    }
-
-    header {
-      background: #222;
-      color: white;
-      padding: 1.5em;
-      text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 2.5em;
-      letter-spacing: 1px;
-    }
-
-    header p {
-      font-size: 1.1em;
-      margin-top: 0.5em;
-      color: #ccc;
-    }
-
-    .container {
       padding: 2em;
-      max-width: 1000px;
+      max-width: 1200px;
       margin: auto;
+      transition: background 0.3s, color 0.3s;
     }
-
+    .dark-mode {
+      background: #1a1a1a;
+      color: #eee;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 2em;
+    }
+    header h1 {
+      font-size: 2.5em;
+      margin: 0.2em;
+    }
     #searchBar {
       width: 100%;
       padding: 0.75em;
-      margin-bottom: 2em;
+      font-size: 1em;
       border-radius: 8px;
       border: 1px solid #ccc;
-      font-size: 1em;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+      margin-bottom: 2em;
     }
-
     .block-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.5em;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1em;
     }
-
     .block {
       background: white;
       padding: 1em;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-      transition: transform 0.2s, box-shadow 0.2s;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: transform 0.2s;
       cursor: pointer;
     }
-
-    .block:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    .dark-mode .block {
+      background: #2b2b2b;
+      color: white;
     }
-
+    .block:hover {
+      transform: scale(1.02);
+    }
     .block h3 {
       margin: 0;
-      font-size: 1.2em;
+      font-size: 1.1em;
     }
-
     .block p {
       margin: 0.3em 0;
       font-family: monospace;
-      font-size: 0.95em;
     }
-
     .char-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(32px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
       gap: 0.4em;
       margin-top: 2em;
     }
-
     .char-box {
       background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
       padding: 0.5em;
       text-align: center;
-      font-size: 1.25em;
+      font-size: 1.3em;
       cursor: pointer;
       transition: background 0.2s, transform 0.2s;
     }
-
+    .dark-mode .char-box {
+      background: #3a3a3a;
+    }
     .char-box:hover {
-      background: #f0f0f0;
+      background: #e0e0e0;
       transform: scale(1.1);
+    }
+    .dark-toggle {
+      text-align: right;
+      margin-bottom: 1em;
+      cursor: pointer;
+      background: #ccc;
+      padding: 0.4em 1em;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .dark-mode .dark-toggle {
+      background: #555;
+      color: white;
     }
   </style>
 </head>
 <body>
+  <div class="dark-toggle" onclick="toggleDarkMode()">Toggle Dark Mode</div>
   <header>
     <h1>Unicode Atlas</h1>
-    <p>Explore the characters and blocks of the universal language</p>
+    <p>Explore all the Unicode blocks and characters</p>
   </header>
-  <div class="container">
-    <input type="text" id="searchBar" placeholder="Search Unicode blocks..." />
-    <div class="block-grid" id="blockGrid"></div>
-    <div id="charGrid" class="char-grid"></div>
-  </div>
-
+  <input type="text" id="searchBar" placeholder="Search blocks by name...">
+  <div class="block-grid" id="blockGrid"></div>
+  <div id="charGrid" class="char-grid"></div>
   <script>
-    const blocks = [
-      { name: "Basic Latin", start: 0x0000, end: 0x007F },
-      { name: "Latin-1 Supplement", start: 0x0080, end: 0x00FF },
-      { name: "Greek and Coptic", start: 0x0370, end: 0x03FF },
-      { name: "Cyrillic", start: 0x0400, end: 0x04FF },
-      { name: "Arabic", start: 0x0600, end: 0x06FF },
-      { name: "Emoji", start: 0x1F600, end: 0x1F64F }
-    ];
-
     const blockGrid = document.getElementById("blockGrid");
     const charGrid = document.getElementById("charGrid");
-    const searchBar = document.getElementById("searchBar");
+    const searchBar = document.getElementById("searchBar");function displayBlocks(filter = "") {
+  blockGrid.innerHTML = "";
+  const filtered = unicodeBlocks.filter(block =>
+    block.name.toLowerCase().includes(filter.toLowerCase())
+  );
 
-    function displayBlocks(filter = "") {
-      blockGrid.innerHTML = "";
-      blocks
-        .filter(block => block.name.toLowerCase().includes(filter.toLowerCase()))
-        .forEach(block => {
-          const div = document.createElement("div");
-          const preview = [...Array(5).keys()]
-            .map(i => String.fromCodePoint(block.start + i))
-            .join(" ");
-          div.className = "block";
-          div.innerHTML = `<h3>${block.name}</h3>
-            <p>U+${block.start.toString(16).toUpperCase()} - U+${block.end.toString(16).toUpperCase()}</p>
-            <p>${preview}</p>`;
-          div.onclick = () => loadCharacters(block);
-          blockGrid.appendChild(div);
-        });
+  filtered.forEach(block => {
+    const previewChars = [];
+    for (let i = block.start; i <= block.end && previewChars.length < 5; i++) {
+      const char = String.fromCodePoint(i);
+      if (char.trim()) previewChars.push(char);
     }
+    const div = document.createElement("div");
+    div.className = "block";
+    div.innerHTML = `
+      <h3>${block.name}</h3>
+      <p>U+${block.start.toString(16).toUpperCase()} - U+${block.end.toString(16).toUpperCase()}</p>
+      <p>${previewChars.join(' ')}</p>
+    `;
+    div.onclick = () => loadCharacters(block);
+    blockGrid.appendChild(div);
+  });
+}
 
-    function loadCharacters(block) {
-      charGrid.innerHTML = '';
-      for (let i = block.start; i <= block.end; i++) {
-        const codeHex = i.toString(16).toUpperCase().padStart(4, '0');
-        const char = String.fromCodePoint(i);
-        const box = document.createElement("div");
-        box.className = "char-box";
-        box.textContent = char;
-        box.title = `U+${codeHex}`;
-        box.onclick = () => window.location.href = `letter.html?code=${codeHex}`;
-        charGrid.appendChild(box);
-      }
-    }
+function loadCharacters(block) {
+  charGrid.innerHTML = "";
+  for (let i = block.start; i <= block.end; i++) {
+    const codeHex = i.toString(16).toUpperCase().padStart(4, '0');
+    const char = String.fromCodePoint(i);
+    const box = document.createElement("div");
+    box.className = "char-box";
+    box.textContent = char;
+    box.title = `U+${codeHex}`;
+    box.onclick = () => window.location.href = `letter.html?code=${codeHex}`;
+    charGrid.appendChild(box);
+  }
+}
 
-    searchBar.addEventListener("input", e => displayBlocks(e.target.value));
-    displayBlocks();
+searchBar.addEventListener("input", (e) => {
+  displayBlocks(e.target.value);
+  charGrid.innerHTML = "";
+});
+
+function toggleDarkMode() {
+  document.body.classList.toggle("dark-mode");
+}
+
+displayBlocks();
+
   </script>
 </body>
 </html>
