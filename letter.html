@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, sans-serif;
-      background: linear-gradient(to bottom right, #f9f9f9, #fff);
+      background: #fdfdfd;
       color: #333;
       padding: 2em;
       max-width: 700px;
@@ -51,6 +51,15 @@
     button:hover {
       background: #222;
     }
+    #debug {
+      margin-top: 2em;
+      background: #f0f0f0;
+      padding: 1em;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.9em;
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body>
@@ -65,6 +74,8 @@
     <div class="info-line"><strong>Copy:</strong> <button onclick="copyChar()">Copy to Clipboard</button></div>
   </div>
 
+  <pre id="debug"></pre>
+
   <script>
     const blocks = [
       { name: "Basic Latin", start: 0x0000, end: 0x007F },
@@ -75,15 +86,24 @@
       { name: "Emoji", start: 0x1F600, end: 0x1F64F }
     ];
 
+    const debugBox = document.getElementById("debug");
+    const log = (...msg) => debugBox.textContent += msg.join(" ") + "\\n";
+
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
 
+    log("Raw URL code:", code);
+
     if (!code) {
-      document.body.innerHTML = '<p>No character code provided.</p>';
+      document.body.innerHTML = '<p>No character code provided in URL.</p>';
     } else {
       const paddedCode = code.toUpperCase().padStart(4, '0');
       const codepoint = parseInt(paddedCode, 16);
       const char = String.fromCodePoint(codepoint);
+
+      log("Padded code:", paddedCode);
+      log("Character:", char);
+      log("Decimal codepoint:", codepoint);
 
       document.getElementById('charSymbol').textContent = char;
       document.getElementById('charCode').textContent = char;
@@ -92,13 +112,17 @@
       const block = blocks.find(b => codepoint >= b.start && codepoint <= b.end);
       document.getElementById('charBlock').textContent = block ? block.name : 'Unknown Block';
 
+      log("Block detected:", block ? block.name : "None");
+
       fetch("UnicodeData.txt")
         .then(res => res.text())
         .then(text => {
           const lines = text.split('\n');
-          const line = lines.find(l => l.startsWith(paddedCode));
-          if (line) {
-            const parts = line.split(';');
+          const match = lines.find(l => l.startsWith(paddedCode));
+          log("Line match:", match);
+
+          if (match) {
+            const parts = match.split(';');
             document.getElementById('charName').textContent = parts[1];
             document.getElementById('charCategory').textContent = parts[2];
           } else {
