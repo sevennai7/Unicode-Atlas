@@ -1,17 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
+<!-- letter.html -->
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Unicode Character Info</title>
+  <script src="unicode-blocks.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, sans-serif;
       background: #fdfdfd;
       color: #333;
       padding: 2em;
-      max-width: 700px;
+      max-width: 800px;
       margin: auto;
+      transition: background 0.3s, color 0.3s;
+    }
+    .dark-mode {
+      background: #1a1a1a;
+      color: #eee;
     }
     .char-display {
       font-size: 5em;
@@ -23,6 +29,11 @@
       padding: 1.5em;
       border-radius: 10px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      margin-bottom: 1em;
+    }
+    .dark-mode .info-box {
+      background: #2b2b2b;
+      color: #eee;
     }
     .info-title {
       font-size: 1.4em;
@@ -36,7 +47,7 @@
     }
     .info-line strong {
       display: inline-block;
-      width: 110px;
+      width: 130px;
     }
     button {
       padding: 0.5em 1em;
@@ -51,18 +62,29 @@
     button:hover {
       background: #222;
     }
-    #debug {
-      margin-top: 2em;
-      background: #f0f0f0;
-      padding: 1em;
-      border-radius: 8px;
-      font-family: monospace;
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1em;
+    }
+    .dark-toggle {
+      cursor: pointer;
       font-size: 0.9em;
-      white-space: pre-wrap;
+      background: #ccc;
+      border-radius: 5px;
+      padding: 0.2em 0.6em;
+    }
+    .dark-mode .dark-toggle {
+      background: #555;
+      color: white;
     }
   </style>
 </head>
 <body>
+  <div class="top-bar">
+    <button onclick="window.location.href='index.html'">← Back to Unicode Blocks</button>
+    <div class="dark-toggle" onclick="toggleDarkMode()">Toggle Dark Mode</div>
+  </div>
   <div class="char-display" id="charSymbol"></div>
   <div class="info-box">
     <div class="info-title">Character Info</div>
@@ -71,75 +93,69 @@
     <div class="info-line"><strong>Name:</strong> <span id="charName">(loading...)</span></div>
     <div class="info-line"><strong>Block:</strong> <span id="charBlock">(Detecting...)</span></div>
     <div class="info-line"><strong>Category:</strong> <span id="charCategory">(loading...)</span></div>
+    <div class="info-line"><strong>Plane:</strong> <span id="charPlane"></span></div>
+    <div class="info-line"><strong>UTF-8:</strong> <span id="utf8"></span></div>
+    <div class="info-line"><strong>UTF-16:</strong> <span id="utf16"></span></div>
+    <div class="info-line"><strong>HTML Entity:</strong> <span id="htmlEntity"></span></div>
     <div class="info-line"><strong>Copy:</strong> <button onclick="copyChar()">Copy to Clipboard</button></div>
+    <div class="info-line"><strong>More Info:</strong> <a id="linkCodepoints" target="_blank">Codepoints.net</a></div>
   </div>
-
-  <pre id="debug"></pre>
-
   <script>
-    const blocks = [
-      { name: "Basic Latin", start: 0x0000, end: 0x007F },
-      { name: "Latin-1 Supplement", start: 0x0080, end: 0x00FF },
-      { name: "Greek and Coptic", start: 0x0370, end: 0x03FF },
-      { name: "Cyrillic", start: 0x0400, end: 0x04FF },
-      { name: "Arabic", start: 0x0600, end: 0x06FF },
-      { name: "Emoji", start: 0x1F600, end: 0x1F64F }
-    ];
+    const code = new URLSearchParams(window.location.search).get('code');
+    const paddedCode = code?.toUpperCase().padStart(4, '0');if (!paddedCode) {
+  document.body.innerHTML = '<p>No character code provided in URL.</p>';
+} else {
+  const codepoint = parseInt(paddedCode, 16);
+  const char = String.fromCodePoint(codepoint);
 
-    const debugBox = document.getElementById("debug");
-    const log = (...msg) => debugBox.textContent += msg.join(" ") + "\\n";
+  document.getElementById('charSymbol').textContent = char;
+  document.getElementById('charCode').textContent = char;
+  document.getElementById('codepoint').textContent = `U+${paddedCode}`;
+  document.getElementById('linkCodepoints').href = `https://codepoints.net/U+${paddedCode}`;
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
+  const block = unicodeBlocks.find(b => codepoint >= b.start && codepoint <= b.end);
+  document.getElementById('charBlock').textContent = block ? block.name : 'Unknown Block';
 
-    log("Raw URL code:", code);
-
-    if (!code) {
-      document.body.innerHTML = '<p>No character code provided in URL.</p>';
-    } else {
-      const paddedCode = code.toUpperCase().padStart(4, '0');
-      const codepoint = parseInt(paddedCode, 16);
-      const char = String.fromCodePoint(codepoint);
-
-      log("Padded code:", paddedCode);
-      log("Character:", char);
-      log("Decimal codepoint:", codepoint);
-
-      document.getElementById('charSymbol').textContent = char;
-      document.getElementById('charCode').textContent = char;
-      document.getElementById('codepoint').textContent = `U+${paddedCode}`;
-
-      const block = blocks.find(b => codepoint >= b.start && codepoint <= b.end);
-      document.getElementById('charBlock').textContent = block ? block.name : 'Unknown Block';
-
-      log("Block detected:", block ? block.name : "None");
-
-      fetch("UnicodeData.txt")
-        .then(res => res.text())
-        .then(text => {
-          const lines = text.split('\n');
-          const match = lines.find(l => l.startsWith(paddedCode));
-          log("Line match:", match);
-
-          if (match) {
-            const parts = match.split(';');
-            document.getElementById('charName').textContent = parts[1];
-            document.getElementById('charCategory').textContent = parts[2];
-          } else {
-            document.getElementById('charName').textContent = '(Name not found)';
-            document.getElementById('charCategory').textContent = '(Unknown)';
-          }
-        });
-    }
-
-    function copyChar() {
-      const code = new URLSearchParams(window.location.search).get('code');
-      if (code) {
-        const char = String.fromCodePoint(parseInt(code, 16));
-        navigator.clipboard.writeText(char);
-        alert(`Copied: ${char}`);
+  fetch("UnicodeData.txt")
+    .then(res => res.text())
+    .then(text => {
+      const line = text.split('\n').find(l => l.startsWith(paddedCode));
+      if (line) {
+        const parts = line.split(';');
+        document.getElementById('charName').textContent = parts[1];
+        document.getElementById('charCategory').textContent = parts[2];
+      } else {
+        document.getElementById('charName').textContent = '(Name not found)';
+        document.getElementById('charCategory').textContent = '(Unknown)';
       }
-    }
+    });
+
+  const plane = codepoint <= 0xFFFF ? "BMP (Basic Multilingual Plane)" :
+                codepoint <= 0x1FFFF ? "SMP (Supplementary Multilingual Plane)" :
+                codepoint <= 0x2FFFF ? "SIP (Supplementary Ideographic Plane)" :
+                codepoint <= 0x3FFFF ? "TIP (Tertiary Ideographic Plane)" : "Unknown";
+  document.getElementById('charPlane').textContent = plane;
+
+  const encoder = new TextEncoder();
+  const utf8Bytes = Array.from(encoder.encode(char)).map(b => b.toString(16).padStart(2, '0')).join(' ');
+  document.getElementById('utf8').textContent = utf8Bytes.toUpperCase();
+
+  const utf16 = Array.from(char).map(c => c.charCodeAt(0).toString(16).padStart(4, '0')).join(' ');
+  document.getElementById('utf16').textContent = utf16.toUpperCase();
+
+  const htmlEntity = `&#${codepoint};`;
+  document.getElementById('htmlEntity').textContent = htmlEntity;
+}
+
+function copyChar() {
+  navigator.clipboard.writeText(String.fromCodePoint(parseInt(code, 16)));
+  alert("Character copied!");
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle("dark-mode");
+}
+
   </script>
 </body>
 </html>
