@@ -174,9 +174,14 @@
   const utf8Bytes = Array.from(encoder.encode(char)).map(b => b.toString(16).padStart(2, '0')).join(' ');
   document.getElementById('utf8').textContent = utf8Bytes.toUpperCase();
 
-  const utf16 = Array.from(char).map(c => c.charCodeAt(0).toString(16).padStart(4, '0')).join(' ');
-  document.getElementById('utf16').textContent = utf16.toUpperCase();
-
+  const utf16Units = [];
+for (const unit of new TextEncoder('utf-16le').encode(char)) {
+  utf16Units.push(unit.toString(16).padStart(2, '0'));
+}
+const utf16 = utf16Units.map((u, i) => i % 2 === 1 ? utf16Units[i - 1] + u : null)
+                        .filter(x => x).join(' ').toUpperCase();
+document.getElementById('utf16').textContent = utf16;
+      
   const htmlEntity = `&#${codepoint};`;
   document.getElementById('htmlEntity').textContent = htmlEntity;
 }
